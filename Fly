@@ -1,0 +1,87 @@
+local player = game.Players.LocalPlayer
+local mouse = player:GetMouse()
+local flying = false
+local speed = 50  -- Velocidad inicial de vuelo
+local bodyGyro, bodyVelocity, seat
+local screenGui = Instance.new("ScreenGui")
+local button = Instance.new("TextButton")
+local speedLabel = Instance.new("TextLabel")
+local increaseSpeedButton = Instance.new("TextButton")
+local decreaseSpeedButton = Instance.new("TextButton")
+
+-- Función para activar el vuelo
+local function startFlying()
+    if not flying then
+        flying = true
+        
+        -- Simulamos que el jugador está sentado
+        seat = Instance.new("Seat")
+        seat.Parent = player.Character
+        seat.Name = "FakeSeat"
+        
+        -- Crear BodyGyro y BodyVelocity para el vuelo
+        bodyGyro = Instance.new("BodyGyro")
+        bodyVelocity = Instance.new("BodyVelocity")
+
+        bodyGyro.MaxTorque = Vector3.new(400000, 400000, 400000)  -- Ajustamos la fuerza
+        bodyGyro.CFrame = player.Character.HumanoidRootPart.CFrame
+
+        bodyVelocity.MaxForce = Vector3.new(400000, 400000, 400000)
+        bodyVelocity.Velocity = Vector3.new(0, 0, 0)  -- No queremos gravedad
+
+        bodyGyro.Parent = player.Character.HumanoidRootPart
+        bodyVelocity.Parent = player.Character.HumanoidRootPart
+
+        -- Comenzamos el vuelo y controlamos la dirección
+        game:GetService("RunService").Heartbeat:Connect(function()
+            if flying then
+                bodyVelocity.Velocity = (mouse.Hit.p - player.Character.HumanoidRootPart.Position).unit * speed
+                bodyGyro.CFrame = CFrame.new(player.Character.HumanoidRootPart.Position, mouse.Hit.p)
+            end
+        end)
+    end
+end
+
+-- Función para detener el vuelo
+local function stopFlying()
+    if flying then
+        flying = false
+        if seat then
+            seat:Destroy()  -- Eliminamos el "FakeSeat"
+        end
+        if bodyGyro then
+            bodyGyro:Destroy()
+        end
+        if bodyVelocity then
+            bodyVelocity:Destroy()
+        end
+    end
+end
+
+-- Crear la interfaz
+screenGui.Parent = player:WaitForChild("PlayerGui")
+
+-- Botón "Volar"
+button.Size = UDim2.new(0, 120, 0, 50)
+button.Position = UDim2.new(0, 50, 0, 50)
+button.BackgroundColor3 = Color3.fromRGB(0, 200, 0)
+button.Text = "Volar"
+button.TextColor3 = Color3.fromRGB(255, 255, 255)
+button.TextScaled = true
+button.Parent = screenGui
+
+-- Etiqueta de velocidad
+speedLabel.Size = UDim2.new(0, 120, 0, 50)
+speedLabel.Position = UDim2.new(0, 50, 0, 110)
+speedLabel.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+speedLabel.Text = "Velocidad: " .. speed
+speedLabel.TextColor3 = Color3.fromRGB(0, 0, 0)
+speedLabel.TextScaled = true
+speedLabel.Parent = screenGui
+
+-- Botón para aumentar la velocidad
+increaseSpeedButton.Size = UDim2.new(0, 50, 0, 50)
+increaseSpeedButton.Position = UDim2.new(0, 180, 0, 110)
+increaseSpeedButton.BackgroundColor3 = Color3.fromRGB(0, 255, 0)
+increaseSpeedButton.Text = "+"
+increaseSpeedButton.TextColor3 = Color
